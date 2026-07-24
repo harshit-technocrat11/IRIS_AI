@@ -12,6 +12,29 @@ from app.agents.iris_agent import run_iris_agent
 
 logger = logging.getLogger("IRIS-Telegram")
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, Update
+from telegram.ext import ContextTypes
+from app.core.settings import settings
+
+
+async def start_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Sends start greeting with Mini App voice call button."""
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "📞 Call IRIS (Live Duplex)",
+                    web_app=WebAppInfo(url=f"{settings.APP_URL}/call"),
+                )
+            ]
+        ]
+    )
+    await update.message.reply_text(
+        "⚡ *IRIS AI Engine Ready*\nTap below to start a live voice call or send a text message.",
+        reply_markup=keyboard,
+        parse_mode="Markdown",
+    )
+
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the /start command with user access control."""

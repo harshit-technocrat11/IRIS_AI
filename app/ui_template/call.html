@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IRIS AI Voice Call</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <style>
+    body { background: #0f172a; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .card { background: #1e293b; padding: 2rem; border-radius: 16px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .status { font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem; color: #38bdf8; }
+    button { background: #ef4444; color: white; border: none; padding: 12px 28px; border-radius: 9999px; font-size: 1rem; cursor: pointer; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="status" id="status">Connecting to IRIS...</div>
+    <button id="endBtn">End Call</button>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) tg.expand();
+
+    let room;
+    async function initCall() {
+      try {
+        const userId = tg?.initDataUnsafe?.user?.id || 'local_user';
+        const res = await fetch(`/api/livekit-token?room=iris-room&identity=user_${userId}`);
+        const { token, url } = await res.json();
+
+        room = new LiveKit.Room();
+        
+        // Handle incoming AI audio track
+        room.on(LiveKit.RoomEvent.TrackSubscribed, (track) => {
+          if (track.kind === LiveKit.Track.Kind.Audio) {
+            const audioElem = track.attach();
+            document.body.appendChild(audioElem);
+          }
+        });
+
+        await room.connect(url, token);
+        await room.localParticipant.enableMicrophone();
+        document.getElementById('status').innerText = '🎙️ Connected to IRIS';
+      } catch (err) {
+        document.getElementById('status').innerText = 'Connection Failed';
+        console.error(err);
+      }
+    }
+
+    document.getElementById('endBtn').onclick = () => {
+      if (room) room.disconnect();
+      if (tg) tg.close();
+    };
+
+    initCall();
+  </script>
+</body>
+</html>

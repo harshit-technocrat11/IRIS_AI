@@ -1,11 +1,21 @@
 import os
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Response, status
+from fastapi import FastAPI, Request, Response, status, Query
 from telegram import Update
 from app.core.settings import settings
 from app.bot.handlers import telegram_app
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from livekit.api import AccessToken, VideoGrants
+from pathlib import Path
 import uvicorn
+
+BASE_DIR = Path(__file__).resolve().parent  
+TEMPLATES_DIR = BASE_DIR / "ui_template" 
+
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("IRIS-FastAPI")
 
@@ -52,6 +62,31 @@ async def telegram_webhook(request: Request):
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "mode": "webhook", "engine": "OpenAI Agents SDK"}
+
+
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+# UI path
+
+
+@app.get("/call", response_class=HTMLResponse)
+async def serve_call_page(request: Request):
+    """Renders the Telegram Mini App WebRTC voice interface."""
+    return templates.TemplateResponse(request=request, name="call.html")
+
+
+@app.get("/api/livekit-token")
+async def get_livekit_token(
+    room: str = Query("iris-voice-room"), identity: str = Query("telegram_user")
+):
+    """Generates a secure WebRTC room access token for LiveKit."""
+    token = (
+        AccessToken(settings.LIVEKIT_API_KEY, settings.LIVEKIT_API_SECRET)
+        .with_identity(identity)
+        .with_grants(VideoGrants(room_join=True, room=room))
+        .to_jwt()
+    )
+    return {"token": token, "url": settings.LIVEKIT_URL}
+
 
 if __name__ == "__main__":
     uvicorn.run(

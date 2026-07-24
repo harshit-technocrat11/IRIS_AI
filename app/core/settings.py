@@ -7,6 +7,9 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     ALLOWED_TELEGRAM_USER_ID: int
     APP_URL: str
+    LIVEKIT_URL: str
+    LIVEKIT_API_SECRET: str
+    LIVEKIT_API_KEY: str
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
