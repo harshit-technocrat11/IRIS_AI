@@ -60,12 +60,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_text = update.message.text
     logger.info(f"Received message from User [{user_id}]: {user_text}")
 
-    # Show typing state in Telegram chat window
     await context.bot.send_chat_action(
         chat_id=update.effective_chat.id, action="typing"
     )
 
-    # Run agent logic in isolated module
     agent_response = await run_iris_agent(user_text)
 
     await update.message.reply_text(agent_response)

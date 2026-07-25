@@ -9,12 +9,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from livekit.api import AccessToken, VideoGrants
 from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 import uvicorn
-
-BASE_DIR = Path(__file__).resolve().parent  
-TEMPLATES_DIR = BASE_DIR / "ui_template" 
-
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("IRIS-FastAPI")
@@ -63,6 +59,12 @@ async def telegram_webhook(request: Request):
 async def health_check():
     return {"status": "ok", "mode": "webhook", "engine": "OpenAI Agents SDK"}
 
+BASE_DIR = Path(__file__).resolve().parent
+TEMPLATES_DIR = BASE_DIR / "ui_template"
+
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 # UI path
