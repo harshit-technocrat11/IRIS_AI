@@ -1,7 +1,7 @@
 import os
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Response, status, Query
+from fastapi import FastAPI, Request, Response, status, Header, HTTPException
 from telegram import Update
 from app.core.settings import settings
 from app.bot.handlers import telegram_app
@@ -15,7 +15,8 @@ import uvicorn
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("IRIS-FastAPI")
 
-WEBHOOK_PATH = f"/webhook/{settings.TELEGRAM_BOT_TOKEN}"
+WEBHOOK_SECRET = settings.TELEGRAM_WEBHOOK_SECRET
+WEBHOOK_PATH = f"/webhook/{WEBHOOK_SECRET}"
 WEBHOOK_URL = f"{settings.APP_URL}{WEBHOOK_PATH}"
 
 
@@ -23,10 +24,14 @@ WEBHOOK_URL = f"{settings.APP_URL}{WEBHOOK_PATH}"
 async def lifespan(app: FastAPI):
 
     await telegram_app.initialize()
+
     await telegram_app.bot.set_webhook(
         url=WEBHOOK_URL,
         allowed_updates=Update.ALL_TYPES,
+        secret_token=WEBHOOK_SECRET,
+        drop_pending_updates=True,
     )
+
     logger.info(f"🚀 Registered Telegram Webhook at: {WEBHOOK_URL}")
 
     yield
@@ -40,54 +45,32 @@ app = FastAPI(title="IRIS AI Engine", lifespan=lifespan)
 
 
 @app.post(WEBHOOK_PATH)
-async def telegram_webhook(request: Request):
-    """FastAPI webhook endpoint receiving push payloads from Telegram."""
+async def telegram_webhook(
+    request: Request, x_telegram_bot_api_secret_token: str | None = Header(default=None)
+):
+    """
+    FastAPI webhook endpoint receiving push payloads from Telegram.
+    🔒 Validates the secret token before processing.
+    """
+
+    if x_telegram_bot_api_secret_token != WEBHOOK_SECRET:
+        logger.warning(f"⚠️ Invalid secret token from {request.client.host}")
+        raise HTTPException(status_code=403, detail="Invalid secret token")
+
     try:
-        print("req: ", request)
         data = await request.json()
-        
-        print("data: ", data)
         update = Update.de_json(data, telegram_app.bot)
         await telegram_app.process_update(update)
         return Response(status_code=status.HTTP_200_OK)
     except Exception as e:
-        logger.error(f"Error handling webhook update: {e}")
-        return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        logger.error(f"Error handling webhook update: {e}", exc_info=True)
+
+        return Response(status_code=status.HTTP_200_OK)
 
 
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "mode": "webhook", "engine": "OpenAI Agents SDK"}
-
-BASE_DIR = Path(__file__).resolve().parent
-TEMPLATES_DIR = BASE_DIR / "ui_template"
-
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
-
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
-
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
-# UI path
-
-
-@app.get("/call", response_class=HTMLResponse)
-async def serve_call_page(request: Request):
-    """Renders the Telegram Mini App WebRTC voice interface."""
-    return templates.TemplateResponse(request=request, name="call.html")
-
-
-@app.get("/api/livekit-token")
-async def get_livekit_token(
-    room: str = Query("iris-voice-room"), identity: str = Query("telegram_user")
-):
-    """Generates a secure WebRTC room access token for LiveKit."""
-    token = (
-        AccessToken(settings.LIVEKIT_API_KEY, settings.LIVEKIT_API_SECRET)
-        .with_identity(identity)
-        .with_grants(VideoGrants(room_join=True, room=room))
-        .to_jwt()
-    )
-    return {"token": token, "url": settings.LIVEKIT_URL}
 
 
 if __name__ == "__main__":

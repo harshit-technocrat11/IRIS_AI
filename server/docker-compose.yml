@@ -1,0 +1,30 @@
+version: '1.0'
+
+services:
+  iris-ai:
+    build: .
+    container_name: iris-ai
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_WEBHOOK_SECRET=${TELEGRAM_WEBHOOK_SECRET}
+      - ALLOWED_TELEGRAM_USER_ID=${ALLOWED_TELEGRAM_USER_ID}
+      - APP_URL=${APP_URL}
+      - OPENAI_AGENTS_DISABLE_TRACING=1
+    volumes:
+
+      - iris_data:/app/data
+    restart: unless-stopped
+    networks:
+      - iris-network
+
+
+volumes:
+  iris_data:
+    driver: local
+
+networks:
+  iris-network:
+    driver: bridge   
