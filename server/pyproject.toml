@@ -18,6 +18,7 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
     "python-telegram-bot>=22.8",
+    "tavily-python>=0.7.26",
     "telegram>=0.0.1",
     "uvicorn[standard]>=0.51.0",
 ]

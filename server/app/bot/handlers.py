@@ -48,7 +48,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await context.bot.send_chat_action(
         chat_id=update.effective_chat.id, action="typing"
     )
-
+    
     agent_response = await run_orchestrator_agent(user_prompt=user_text , session_id=chat_id)
 
     await update.message.reply_text(agent_response)

@@ -9,11 +9,16 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from livekit.api import AccessToken, VideoGrants
 from pathlib import Path
+from agents import set_default_openai_key
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("IRIS-FastAPI")
+
+OPENAI_API_KEY = settings.OPENAI_API_KEY
+set_default_openai_key(OPENAI_API_KEY)
+
 
 WEBHOOK_SECRET = settings.TELEGRAM_WEBHOOK_SECRET
 WEBHOOK_PATH = f"/webhook/{WEBHOOK_SECRET}"

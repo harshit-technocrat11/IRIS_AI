@@ -1,22 +1,27 @@
 import logging
-from agents import Agent, Runner, set_default_openai_key
+from agents import Agent, Runner, set_default_openai_key, trace
 from app.core.settings import settings
 from pathlib import Path
 from agents.extensions.memory import AsyncSQLiteSession
 from app.core.database import DB_PATH
+from app.agents.search_specialist import search_specialist
 
 logger = logging.getLogger("IRIS-Agent")
 
-OPENAI_API_KEY = settings.OPENAI_API_KEY
-set_default_openai_key(OPENAI_API_KEY)
 
 orchestrator_agent = Agent(
     name="Telegram Orchestrator",
     instructions=(
         "You are a helpful AI assistant for a Telegram bot. "
         "You are polite, concise, and helpful. "
-        "You will soon have tools to help with tasks, but for now, just chat."
+        "Reason the user's query, and if required, you can use your tools"
     ),
+    tools=[
+        search_specialist.as_tool(
+            tool_name="search_web",
+            tool_description="Searches the internet for real-time news, facts, and current events.",
+        )
+    ],
 )
 
 
@@ -31,7 +36,13 @@ async def run_orchestrator_agent(user_prompt: str, session_id: str) -> str:
     session = AsyncSQLiteSession(session_id=session_id, db_path=DB_PATH)
 
     try:
-        result = await Runner.run(orchestrator_agent, user_prompt, session=session)
+        with trace("IRIS Agent Execution"): 
+            result = await Runner.run(
+                orchestrator_agent, 
+                user_prompt, 
+                session=session
+            )
+
         print("orchestrator result: ",result.final_output)
 
         return result.final_output
