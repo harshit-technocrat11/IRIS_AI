@@ -3,7 +3,7 @@ from agents import Agent, Runner, set_default_openai_key
 from app.core.settings import settings
 from pathlib import Path
 from agents.extensions.memory import AsyncSQLiteSession
-from app.core.database import db_path
+from app.core.database import DB_PATH
 
 logger = logging.getLogger("IRIS-Agent")
 
@@ -28,12 +28,10 @@ async def run_orchestrator_agent(user_prompt: str, session_id: str) -> str:
         session_id: Unique ID for the user (e.g., Telegram Chat ID).
     """ 
 
-    session = AsyncSQLiteSession(session_id=session_id, db_path=db_path)
-    db_path.parent.mkdir(parents=True, exist_ok=True)
-
+    session = AsyncSQLiteSession(session_id=session_id, db_path=DB_PATH)
 
     try:
-        result = await Runner.run(orchestrator_agent, user_prompt)
+        result = await Runner.run(orchestrator_agent, user_prompt, session=session)
         print("orchestrator result: ",result.final_output)
 
         return result.final_output

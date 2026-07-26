@@ -17,7 +17,6 @@ from telegram.ext import ContextTypes
 from app.core.settings import settings
 
 
-
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles the /start command with user access control."""
     if update.effective_user.id != settings.ALLOWED_TELEGRAM_USER_ID:
@@ -40,13 +39,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
 
     user_text = update.message.text
-    logger.info(f"Received message from User [{user_id}]: {user_text}")
+
+    # extract the unique chat id
+    chat_id = str(update.effective_chat.id)
+
+    logger.info(f"ChatID:[{chat_id}]\nReceived message from User [{user_id}]: {user_text}")
 
     await context.bot.send_chat_action(
         chat_id=update.effective_chat.id, action="typing"
     )
 
-    agent_response = await run_orchestrator_agent(user_text)
+    agent_response = await run_orchestrator_agent(user_prompt=user_text , session_id=chat_id)
 
     await update.message.reply_text(agent_response)
 
