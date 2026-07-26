@@ -1,0 +1,20 @@
+# Python ignore
+**/__pycache__/
+**/*.py[cod]
+**/.venv/
+**/venv/
+
+# Node ignore
+**/node_modules/
+**/dist/
+
+# SQLite & Environment ignore
+**/*.db
+**/*.db-wal
+**/*.db-shm
+.env
+
+# IDE & Git ignore
+.git/
+.vscode/
+.idea/
