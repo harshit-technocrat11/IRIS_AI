@@ -37,6 +37,16 @@ class ContactResolutionResult(BaseModel):
     message: str
 
 
+class DraftResult(BaseModel):
+    approval_id: str
+    gmail_draft_id: str
+    to_email: str
+    subject: str
+    body: str
+    is_revision: bool
+    message: str
+
+
 def _get_google_services():
     creds = Credentials.from_authorized_user_file("token.json")
     gmail = build("gmail", "v1", credentials=creds)

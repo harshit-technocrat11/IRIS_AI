@@ -1,4 +1,4 @@
-from app.models.email_models import (EmailContent, EmailSummary, _get_google_services)
+from app.schemas.email_models import (EmailContent, EmailSummary, _get_google_services)
 from agents import function_tool
 from typing import List, Optional
 

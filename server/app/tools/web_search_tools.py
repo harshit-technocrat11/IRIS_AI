@@ -1,5 +1,5 @@
 from agents import function_tool
-from app.models.web_search import WebSearchResponse, SearchResultItem
+from app.schemas.web_search import WebSearchResponse, SearchResultItem
 from tavily import TavilyClient
 from app.core.settings import settings
 import logging

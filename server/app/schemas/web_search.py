@@ -6,7 +6,7 @@ class SearchResultItem(BaseModel):
     title: str = Field(..., description="The title of the search result")
     url: str = Field(..., description="The direct URL to the content")
     snippet: str = Field(..., description="A short summary of the content")
-
+    
 
 class WebSearchResponse(BaseModel):
     query: str = Field(..., description="The search query executed")

@@ -1,5 +1,5 @@
 from agents import output_guardrail, GuardrailFunctionOutput, Runner
-from app.models.web_search import WebSearchResponse
+from app.schemas.web_search import WebSearchResponse
 import logging
 
 logger = logging.getLogger("IRIS-Guardrails")

@@ -1,6 +1,6 @@
 from agents import Agent
 from app.tools.web_search_tools import perform_web_search
-from app.models.web_search import WebSearchResponse
+from app.schemas.web_search import WebSearchResponse
 from app.guardrails.search_guards import search_guardrail
 
 

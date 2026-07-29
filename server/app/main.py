@@ -12,6 +12,7 @@ from pathlib import Path
 from agents import set_default_openai_key
 from fastapi.staticfiles import StaticFiles
 import uvicorn
+from app.core.database import init_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("IRIS-FastAPI")
@@ -38,6 +39,10 @@ async def lifespan(app: FastAPI):
     )
 
     logger.info(f"🚀 Registered Telegram Webhook at: {WEBHOOK_URL}")
+
+    # intialize database connection
+    logger.info("sqlite DB intialized!")
+    await init_db()
 
     yield
 

@@ -1,4 +1,4 @@
-from app.models.email_models import EmailContent, EmailSummary, _get_google_services
+from app.schemas.email_models import EmailContent, EmailSummary, _get_google_services
 from agents import function_tool
 import base64
 import re
@@ -38,7 +38,7 @@ async def read_thread(message_id: str) -> EmailContent:
         body=body,
         date=headers.get("Date", ""),
     )
-    
+
     print( "email-content retrieved:", response)
 
     return response
