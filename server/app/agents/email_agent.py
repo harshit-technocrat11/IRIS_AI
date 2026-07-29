@@ -1,6 +1,6 @@
 from agents import Agent
-from app.tools.email_tools.search_emails import ( search_emails )
-
+from app.tools.email_tools.search_emails import search_emails
+from app.tools.email_tools.read_thread import read_thread
 
 email_agent = Agent(
     name="Email Specialist",
@@ -13,5 +13,5 @@ email_agent = Agent(
         "3. Pass the explicitly resolved email address into draft_email(resolved_email=...).\n"
         "4. You can ONLY create or update drafts. You CANNOT send emails."
     ),
-    tools=[search_emails  ],
+    tools=[search_emails, read_thread],
 )

@@ -2,6 +2,7 @@ from app.models.email_models import (EmailContent, EmailSummary, _get_google_ser
 from agents import function_tool
 from typing import List, Optional
 
+
 @function_tool
 async def search_emails(query: str, max_results: int = 5) -> List[EmailSummary]:
     """Search Gmail inbox using standard search queries. Returns metadata summaries only."""
@@ -41,4 +42,9 @@ async def search_emails(query: str, max_results: int = 5) -> List[EmailSummary]:
                 date=headers.get("Date", ""),
             )
         )
+
+        print("emails search tool: ", summaries)
+
     return summaries
+
+
