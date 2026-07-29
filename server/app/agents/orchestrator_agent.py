@@ -5,6 +5,7 @@ from pathlib import Path
 from agents.extensions.memory import AsyncSQLiteSession
 from app.core.database import DB_PATH
 from app.agents.search_specialist import search_specialist
+from app.agents.email_agent import email_agent
 
 logger = logging.getLogger("IRIS-Agent")
 
@@ -20,7 +21,11 @@ orchestrator_agent = Agent(
         search_specialist.as_tool(
             tool_name="search_web",
             tool_description="Searches the internet for real-time news, facts, and current events.",
-        )
+        ),
+        email_agent.as_tool(
+            tool_name="email_specialist",
+            tool_description="functions:- search inboxes, read message threads, resolve contact names, and draft emails",
+        ),
     ],
 )
 
